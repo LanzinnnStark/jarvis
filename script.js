@@ -111,4 +111,3 @@ const rotulos = {
 
                                                                                                                                                                                                             mudarEstado("idle");
                                                                                                                                                                                                             requestAnimationFrame(desenhar);
-}
