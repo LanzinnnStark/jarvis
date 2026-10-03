@@ -24,9 +24,70 @@ function mudarEstado(estado) {
   alvo = perfis[estado];
 }
 
+// Botões de teste dos estados
 document.querySelectorAll(".botoes button").forEach(function (botao) {
   botao.addEventListener("click", function () {
     mudarEstado(botao.dataset.estado);
+  });
+});
+
+// ---------- MAESTRO: liga voz, cérebro e interface ----------
+const botaoMic = document.getElementById("mic");
+const legenda = document.getElementById("legenda");
+let ocupado = false;
+
+function liberar() {
+  ocupado = false;
+  mudarEstado("idle");
+}
+
+function mostrarErro(mensagem) {
+  legenda.textContent = mensagem;
+  mudarEstado("erro");
+  setTimeout(liberar, 3500);
+}
+
+const mensagensErro = {
+  "not-allowed": "Preciso da permissão do microfone. Libere nas configurações do site.",
+  "service-not-allowed": "Preciso da permissão do microfone. Libere nas configurações do site.",
+  "no-speech": "Não ouvi nada. Toque no microfone e tente de novo.",
+  "audio-capture": "Não encontrei um microfone.",
+  "network": "Sem conexão para reconhecer a voz.",
+  "sem-suporte": "Este navegador não tem reconhecimento de voz. Use o Chrome."
+};
+
+async function processar(pergunta) {
+  mudarEstado("processando");
+  try {
+    const resposta = await Cerebro.responder(pergunta);
+    legenda.textContent = resposta;
+    mudarEstado("respondendo");
+    Voz.falar(resposta, liberar);
+  } catch (e) {
+    mostrarErro("Algo deu errado ao pensar na resposta.");
+  }
+}
+
+botaoMic.addEventListener("click", function () {
+  if (ocupado) return;
+  ocupado = true;
+  legenda.textContent = "";
+  mudarEstado("ouvindo");
+
+  Voz.ouvir({
+    parcial: function (texto) {
+      legenda.textContent = texto;
+    },
+    erro: function (codigo) {
+      mostrarErro(mensagensErro[codigo] || "Erro de voz: " + codigo);
+    },
+    fim: function (texto) {
+      if (!texto) {
+        liberar();
+        return;
+      }
+      processar(texto);
+    }
   });
 });
 

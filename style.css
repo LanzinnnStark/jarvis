@@ -70,3 +70,40 @@
                                                                                           25%      { transform: translateX(-12px); }
                                                                                             75%      { transform: translateX(12px); }
                                                                                             }
+/* Ajuste de tamanho para caber o microfone */
+:root { --tam: min(52vmin, 440px); }
+body { overflow-y: auto; }
+
+.legenda {
+  position: relative;
+  min-height: 24px;
+  max-width: 80vw;
+  text-align: center;
+  font-size: 18px;
+  color: #cfefff;
+  text-shadow: 0 0 10px rgba(53, 200, 255, 0.6);
+}
+
+.mic {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(53, 200, 255, 0.1);
+  border: 2px solid var(--cor);
+  color: var(--cor);
+  box-shadow: 0 0 18px rgba(53, 200, 255, 0.4);
+}
+
+body[data-estado="ouvindo"] .mic {
+  animation: pulsarmic 1s ease-in-out infinite;
+}
+
+@keyframes pulsarmic {
+  0%, 100% { box-shadow: 0 0 10px var(--cor); }
+  50%      { box-shadow: 0 0 30px var(--cor); }
+}
