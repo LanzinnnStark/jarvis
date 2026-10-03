@@ -1,22 +1,80 @@
+:root { --cor: #35c8ff; }
+
 body {
   margin: 0;
-  height: 100vh;
-  background: #020b1f;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    height: 100vh;
+      background: #020b1f;
+        display: flex;
+          flex-direction: column;
+            align-items: center;
+              justify-content: center;
+                gap: 40px;
+                  font-family: sans-serif;
+                  }
 
-.anel {
-  width: 220px;
-  height: 220px;
-  border: 3px solid #35c8ff;
-  border-radius: 50%;
-  box-shadow: 0 0 25px #35c8ff;
-  animation: pulsar 3s ease-in-out infinite;
-}
+                  .rotulo {
+                    color: var(--cor);
+                      letter-spacing: 6px;
+                        font-size: 14px;
+                        }
 
-@keyframes pulsar {
-  0%, 100% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.08); opacity: 1; }
-}
+                        .anel {
+                          width: 220px;
+                            height: 220px;
+                              border: 3px solid var(--cor);
+                                border-radius: 50%;
+                                  box-shadow: 0 0 25px var(--cor);
+                                    animation: pulsar 3s ease-in-out infinite;
+                                    }
+
+                                    .botoes {
+                                      display: flex;
+                                        flex-wrap: wrap;
+                                          justify-content: center;
+                                            gap: 10px;
+                                            }
+
+                                            button {
+                                              background: transparent;
+                                                color: #35c8ff;
+                                                  border: 1px solid #35c8ff;
+                                                    border-radius: 6px;
+                                                      padding: 10px 14px;
+                                                      }
+
+                                                      /* ESTADOS */
+                                                      body[data-estado="ouvindo"] .anel {
+                                                        animation: pulsar 1s ease-in-out infinite;
+                                                          box-shadow: 0 0 45px var(--cor);
+                                                          }
+
+                                                          body[data-estado="processando"] .anel {
+                                                            border-style: dashed;
+                                                              animation: girar 1.5s linear infinite;
+                                                              }
+
+                                                              body[data-estado="respondendo"] .anel {
+                                                                animation: pulsar 0.6s ease-in-out infinite;
+                                                                  box-shadow: 0 0 60px var(--cor);
+                                                                  }
+
+                                                                  body[data-estado="erro"] { --cor: #ff4d5e; }
+                                                                  body[data-estado="erro"] .anel {
+                                                                    animation: tremer 0.4s 3;
+                                                                    }
+
+                                                                    /* ANIMAÇÕES */
+                                                                    @keyframes pulsar {
+                                                                      0%, 100% { transform: scale(1); opacity: 0.7; }
+                                                                        50% { transform: scale(1.08); opacity: 1; }
+                                                                        }
+
+                                                                        @keyframes girar {
+                                                                          to { transform: rotate(360deg); }
+                                                                          }
+
+                                                                          @keyframes tremer {
+                                                                            0%, 100% { transform: translateX(0); }
+                                                                              25% { transform: translateX(-12px); }
+                                                                                75% { transform: translateX(12px); }
+                                                                                }
