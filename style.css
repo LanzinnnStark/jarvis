@@ -1,129 +1,72 @@
 :root {
-      --cor: #35c8ff;
-        --vel: 1;                     /* multiplicador de velocidade */
-          --tam: min(68vmin, 420px);    /* tamanho do HUD, se adapta à tela */
-          }
+    --cor: #35c8ff;
+      --tam: min(80vmin, 520px);
+      }
 
-          body {
-            margin: 0;
-              min-height: 100vh;
-                background: radial-gradient(circle at center, #0a2a5e 0%, #020b1f 70%);
-                  display: flex;
-                    flex-direction: column;
-                      align-items: center;
-                        justify-content: center;
-                          gap: 28px;
-                            font-family: sans-serif;
-                              color: var(--cor);
-                                overflow: hidden;
-                                }
+      body {
+        margin: 0;
+          min-height: 100vh;
+            background: radial-gradient(circle at center, #0a2a5e 0%, #020b1f 70%);
+              display: flex;
+                flex-direction: column;
+                  align-items: center;
+                    justify-content: center;
+                      gap: 24px;
+                        font-family: sans-serif;
+                          color: var(--cor);
+                            overflow: hidden;
+                            }
 
-                                /* Grade técnica do fundo */
-                                .grade {
-                                  position: fixed;
-                                    inset: 0;
-                                      background-image:
-                                          linear-gradient(rgba(53, 200, 255, 0.07) 1px, transparent 1px),
-                                              linear-gradient(90deg, rgba(53, 200, 255, 0.07) 1px, transparent 1px);
-                                                background-size: 40px 40px;
-                                                  pointer-events: none;
-                                                  }
+                            .grade {
+                              position: fixed;
+                                inset: 0;
+                                  background-image:
+                                      linear-gradient(rgba(53, 200, 255, 0.06) 1px, transparent 1px),
+                                          linear-gradient(90deg, rgba(53, 200, 255, 0.06) 1px, transparent 1px);
+                                            background-size: 40px 40px;
+                                              pointer-events: none;
+                                              }
 
-                                                  .topo, .rotulo {
-                                                    position: relative;
-                                                      letter-spacing: 8px;
-                                                        font-size: 13px;
-                                                          opacity: 0.85;
-                                                          }
+                                              .topo, .rotulo {
+                                                position: relative;
+                                                  letter-spacing: 8px;
+                                                    font-size: 13px;
+                                                      opacity: 0.85;
+                                                      }
 
-                                                          /* HUD central */
-                                                          .hud {
-                                                            position: relative;
-                                                              width: var(--tam);
-                                                                height: var(--tam);
-                                                                }
+                                                      .hud {
+                                                        position: relative;
+                                                          width: var(--tam);
+                                                            height: var(--tam);
+                                                            }
 
-                                                                .anel {
-                                                                  position: absolute;
-                                                                    border-radius: 50%;
-                                                                    }
+                                                            canvas {
+                                                              width: 100%;
+                                                                height: 100%;
+                                                                  display: block;
+                                                                  }
 
-                                                                    .a1 {
-                                                                      inset: 0;
-                                                                        border: 2px solid transparent;
-                                                                          border-top-color: var(--cor);
-                                                                            border-bottom-color: var(--cor);
-                                                                              box-shadow: 0 0 20px rgba(53, 200, 255, 0.25);
-                                                                                animation: girar calc(24s / var(--vel)) linear infinite;
-                                                                                }
+                                                                  .botoes {
+                                                                    position: relative;
+                                                                      display: flex;
+                                                                        flex-wrap: wrap;
+                                                                          justify-content: center;
+                                                                            gap: 10px;
+                                                                            }
 
-                                                                                .a2 {
-                                                                                  inset: 8%;
-                                                                                    border: 2px dashed var(--cor);
-                                                                                      opacity: 0.6;
-                                                                                        animation: girar calc(30s / var(--vel)) linear infinite reverse;
-                                                                                        }
+                                                                            button {
+                                                                              background: rgba(53, 200, 255, 0.08);
+                                                                                color: #35c8ff;
+                                                                                  border: 1px solid #35c8ff;
+                                                                                    border-radius: 6px;
+                                                                                      padding: 10px 14px;
+                                                                                      }
 
-                                                                                        .a3 {
-                                                                                          inset: 18%;
-                                                                                            border: 4px solid transparent;
-                                                                                              border-left-color: var(--cor);
-                                                                                                border-right-color: var(--cor);
-                                                                                                  animation: girar calc(12s / var(--vel)) linear infinite;
-                                                                                                  }
+                                                                                      body[data-estado="erro"] { --cor: #ff4d5e; }
+                                                                                      body[data-estado="erro"] .hud { animation: tremer 0.4s 3; }
 
-                                                                                                  .a4 {
-                                                                                                    inset: 30%;
-                                                                                                      border: 2px dotted var(--cor);
-                                                                                                        animation: girar calc(18s / var(--vel)) linear infinite reverse;
-                                                                                                        }
-
-                                                                                                        .nucleo {
-                                                                                                          position: absolute;
-                                                                                                            inset: 40%;
-                                                                                                              border-radius: 50%;
-                                                                                                                background: radial-gradient(circle, var(--cor) 0%, transparent 70%);
-                                                                                                                  animation: pulsar calc(3s / var(--vel)) ease-in-out infinite;
-                                                                                                                  }
-
-                                                                                                                  /* Botões de teste */
-                                                                                                                  .botoes {
-                                                                                                                    position: relative;
-                                                                                                                      display: flex;
-                                                                                                                        flex-wrap: wrap;
-                                                                                                                          justify-content: center;
-                                                                                                                            gap: 10px;
-                                                                                                                            }
-
-                                                                                                                            button {
-                                                                                                                              background: rgba(53, 200, 255, 0.08);
-                                                                                                                                color: #35c8ff;
-                                                                                                                                  border: 1px solid #35c8ff;
-                                                                                                                                    border-radius: 6px;
-                                                                                                                                      padding: 10px 14px;
-                                                                                                                                      }
-
-                                                                                                                                      /* ESTADOS: mudam a velocidade e a cor */
-                                                                                                                                      body[data-estado="ouvindo"]     { --vel: 2.5; }
-                                                                                                                                      body[data-estado="processando"] { --vel: 6; }
-                                                                                                                                      body[data-estado="respondendo"] { --vel: 3; }
-                                                                                                                                      body[data-estado="respondendo"] .nucleo { inset: 34%; }
-
-                                                                                                                                      body[data-estado="erro"] { --cor: #ff4d5e; --vel: 0.4; }
-                                                                                                                                      body[data-estado="erro"] .hud { animation: tremer 0.4s 3; }
-
-                                                                                                                                      /* ANIMAÇÕES */
-                                                                                                                                      @keyframes girar {
-                                                                                                                                        to { transform: rotate(360deg); }
-                                                                                                                                        }
-
-                                                                                                                                        @keyframes pulsar {
-                                                                                                                                          0%, 100% { transform: scale(1);   opacity: 0.6; }
-                                                                                                                                            50%      { transform: scale(1.15); opacity: 1; }
-                                                                                                                                            }
-
-                                                                                                                                            @keyframes tremer {
-                                                                                                                                              0%, 100% { transform: translateX(0); }
-                                                                                                                                                25%      { transform: translateX(-12px); }
-                                                                                                                                                  75%      { transform: translateX(12px); }
-                                                                                                                                                  }
+                                                                                      @keyframes tremer {
+                                                                                        0%, 100% { transform: translateX(0); }
+                                                                                          25%      { transform: translateX(-12px); }
+                                                                                            75%      { transform: translateX(12px); }
+                                                                                            }
