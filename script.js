@@ -92,3 +92,6 @@ botaoMic.addEventListener("click", function () {
 });
 
 mudarEstado("idle");
+setTimeout(function () {
+    legenda.textContent = "Voz: " + Voz.nomeVoz();
+    }, 2000);
