@@ -6,6 +6,53 @@ const Memoria = (function () {
   const MAX_ITENS = 40;   // quantas memórias cabem
   const MAX_TEXTO = 200;  // tamanho máximo de cada uma
 
+  // ---------- "eu" vira "você" quando o JARVIS fala as memórias ----------
+  // Verbos comuns: como ficam quando o "eu" vira "você"
+  const VERBOS = {
+    sou: "é", estou: "está", tenho: "tem", gosto: "gosta", amo: "ama", odeio: "odeia",
+    moro: "mora", trabalho: "trabalha", estudo: "estuda", quero: "quer", uso: "usa",
+    prefiro: "prefere", faço: "faz", vou: "vai", posso: "pode", preciso: "precisa",
+    chamo: "chama", nasci: "nasceu", cresci: "cresceu", tive: "teve", fui: "foi",
+    fiz: "fez", comecei: "começou", terminei: "terminou", toco: "toca", jogo: "joga",
+    assisto: "assiste", leio: "lê", bebo: "bebe", como: "come", durmo: "dorme",
+    acordo: "acorda", acho: "acha", penso: "pensa", sei: "sabe", conheço: "conhece",
+    vivo: "vive", curto: "curte", adoro: "adora", detesto: "detesta", torço: "torce",
+    pretendo: "pretende", planejo: "planeja", sinto: "sente", fico: "fica",
+    cuido: "cuida", dependo: "depende", escuto: "escuta", ouço: "ouve", pratico: "pratica"
+  };
+  const ADVERBIOS = "não|nunca|sempre|também|já|só|ainda|realmente|muito|bastante|geralmente|normalmente";
+
+  function conjugar(verbo) {
+    const v = verbo.toLowerCase();
+    if (VERBOS[v]) return VERBOS[v];
+    // Palpite para verbos que não estão na lista: gosto -> gosta
+    if (v.length > 3 && v.endsWith("o")) return v.slice(0, -1) + "a";
+    return v;
+  }
+
+  function paraVoce(texto) {
+    let t = texto;
+    // "eu me sinto" -> "você se sente"
+    t = t.replace(/\beu\s+me\s+(\p{L}+)/giu, function (m, v) { return "você se " + conjugar(v); });
+    t = t.replace(/\bme chamo\b/giu, "você se chama");
+    // "eu não gosto" -> "você não gosta"
+    t = t.replace(
+      new RegExp("\\beu\\s+((?:(?:" + ADVERBIOS + ")\\s+)*)(\\p{L}+)", "giu"),
+      function (m, advs, v) { return "você " + advs + conjugar(v); }
+    );
+    // Frase que já começa pelo verbo: "moro em Recife" -> "você mora em Recife"
+    t = t.replace(/^(\p{L}+)/u, function (m, v) {
+      return VERBOS[v.toLowerCase()] ? "você " + VERBOS[v.toLowerCase()] : m;
+    });
+    t = t.replace(/\bminhas\b/giu, "suas").replace(/\bminha\b/giu, "sua");
+    t = t.replace(/\bmeus\b/giu, "seus").replace(/\bmeu\b/giu, "seu");
+    t = t.replace(/\bcomigo\b/giu, "com você").replace(/\bmim\b/giu, "você");
+    t = t.replace(/\beu\b/giu, "você");
+    t = t.replace(/\bme\b/giu, "lhe");
+    return t;
+  }
+
+  // ---------- guardar e ler ----------
   function ler() {
     try {
       const bruto = localStorage.getItem(CHAVE);
@@ -41,7 +88,7 @@ const Memoria = (function () {
     return { ok: true, mensagem: "Anotado. Vou me lembrar disso." };
   }
 
-  // Lista só os textos
+  // Lista só os textos originais
   function listar() {
     return ler().map(function (item) { return item.t; });
   }
@@ -62,11 +109,13 @@ const Memoria = (function () {
     }
   }
 
-  // Texto pronto para entregar à IA, uma memória por linha
+  // Texto para a IA: mantém as palavras originais, deixando claro quem disse
   function paraPrompt() {
     const itens = listar();
     if (itens.length === 0) return "";
-    return itens.map(function (t) { return "- " + t; }).join("\n");
+    return itens.map(function (t) {
+      return "- O usuário pediu para lembrar: \"" + t + "\"";
+    }).join("\n");
   }
 
   return {
@@ -74,6 +123,7 @@ const Memoria = (function () {
     listar: listar,
     esquecerUltima: esquecerUltima,
     limpar: limpar,
-    paraPrompt: paraPrompt
+    paraPrompt: paraPrompt,
+    paraVoce: paraVoce
   };
 })();

@@ -48,7 +48,7 @@ const Cerebro = (function () {
       ])) {
         const itens = Memoria.listar();
         if (itens.length === 0) return "Ainda não guardei nenhuma memória sobre você.";
-        const recentes = itens.slice(-6).join("; ");
+        const recentes = itens.slice(-6).map(Memoria.paraVoce).join("; ");
         const extra = itens.length > 6 ? " E mais " + (itens.length - 6) + " memórias antigas." : "";
         return "Eu sei que: " + recentes + "." + extra;
       }
