@@ -1,163 +1,106 @@
-// IA: conversa com a inteligência artificial (Google Gemini, plano grátis).
-// A chave fica só neste aparelho (localStorage).
-// NUNCA coloque a chave dentro do código nem no GitHub.
+// IA: núcleo da conversa. Os provedores (groq.js etc.) se registram aqui.
+// A chave fica só neste aparelho. NUNCA coloque a chave no código nem no GitHub.
 const IA = (function () {
-  const CHAVE_STORAGE = "jarvis_chave_ia";
-  const SERIO_STORAGE = "jarvis_modo_serio";
+  const ESCOLHA = "jarvis_provedor";
+    const MAX_HISTORICO = 8;
+      const historico = [];
+        const provedores = {};
 
-  // Se o primeiro nome der "não encontrado", ele tenta o próximo da lista
-  const MODELOS = ["gemini-flash-latest", "gemini-2.5-flash"];
+          function registrar(nome, provedor) {
+              provedores[nome] = provedor;
+                }
 
-  const TRATAMENTO = "senhor"; // como o JARVIS te chama (pode trocar)
-  const MAX_HISTORICO = 8;     // quantas mensagens ele lembra da conversa atual
-  const historico = [];
+                  function nomeAtual() {
+                      let nome = "groq";
+                          try { nome = localStorage.getItem(ESCOLHA) || "groq"; } catch (e) { /* usa o padrão */ }
+                              return provedores[nome] ? nome : Object.keys(provedores)[0];
+                                }
 
-  function lerChave() {
-    try { return localStorage.getItem(CHAVE_STORAGE) || ""; } catch (e) { return ""; }
-  }
+                                  function lerChave(prov) {
+                                      try { return localStorage.getItem(prov.chaveStorage) || ""; } catch (e) { return ""; }
+                                        }
 
-  // Pede a chave por uma janelinha e guarda neste aparelho
-  function configurarChave() {
-    const nova = window.prompt("Cole aqui a sua chave do Google AI Studio. Ela fica só neste aparelho.");
-    if (nova === null) return "Configuração cancelada.";
-    const limpa = nova.trim();
-    if (!limpa) return "Nenhuma chave foi informada.";
-    try {
-      localStorage.setItem(CHAVE_STORAGE, limpa);
-    } catch (e) {
-      return "Não consegui salvar a chave neste navegador.";
-    }
-    return "Chave salva. Já posso conversar com você.";
-  }
+                                          function escolherProvedor(nome) {
+                                              const prov = provedores[nome];
+                                                  if (!prov) return "Esse provedor não está instalado.";
+                                                      try { localStorage.setItem(ESCOLHA, nome); } catch (e) { return "Não consegui salvar a escolha."; }
+                                                          if (!lerChave(prov)) return "Troquei para o " + prov.nome + ". Diga configurar chave para colocar a chave dele.";
+                                                              return "Certo. Agora estou usando o " + prov.nome + ".";
+                                                                }
 
-  // Modo sério: sem piadas (a menos que você peça)
-  function modoSerio() {
-    try { return localStorage.getItem(SERIO_STORAGE) === "1"; } catch (e) { return false; }
-  }
-  function definirModoSerio(ligado) {
-    try { localStorage.setItem(SERIO_STORAGE, ligado ? "1" : "0"); } catch (e) { /* sem problema */ }
-  }
+                                                                  function configurarChave() {
+                                                                      const prov = provedores[nomeAtual()];
+                                                                          if (!prov) return "Nenhum provedor de inteligência foi carregado.";
+                                                                              const nova = window.prompt("Cole aqui a chave do " + prov.nome + " (" + prov.site + "). Ela fica só neste aparelho.");
+                                                                                  if (nova === null) return "Configuração cancelada.";
+                                                                                      if (!nova.trim()) return "Nenhuma chave foi informada.";
+                                                                                          try { localStorage.setItem(prov.chaveStorage, nova.trim()); } catch (e) { return "Não consegui salvar a chave."; }
+                                                                                              return "Chave do " + prov.nome + " salva. Já posso conversar com você.";
+                                                                                                }
 
-  // A "personalidade" e as regras do JARVIS
-  function instrucao() {
-    const agora = new Date().toLocaleString("pt-BR", { dateStyle: "full", timeStyle: "short" });
+                                                                                                  function definirModoSerio(ligado) {
+                                                                                                      if (typeof Personalidade !== "undefined") Personalidade.definirModoSerio(ligado);
+                                                                                                        }
 
-    let texto =
-      "Você é o J.A.R.V.I.S., assistente pessoal de voz inspirado no do filme Homem de Ferro. " +
-      "Fale sempre em português do Brasil, tratando o usuário por " + TRATAMENTO + ". " +
-      "Suas respostas serão FALADAS em voz alta: use no máximo três frases curtas, " +
-      "sem listas, sem markdown, sem emojis e sem símbolos. " +
-      "Seja honesto: se não souber algo, diga que não sabe. " +
-      "Você NÃO controla dispositivos nem executa ações por conta própria, " +
-      "e nunca deve dizer que fez algo que não fez. " +
-      "Quem executa ações são as rotinas cadastradas no sistema. " +
-      "Se o usuário pedir uma ação que você não consegue fazer, diga isso com clareza. ";
+                                                                                                          function mensagemDeErro(status) {
+                                                                                                              if (status === 400) return "A inteligência recusou o pedido. Se continuar, diga configurar chave para conferir a chave.";
+                                                                                                                  if (status === 401 || status === 403) return "A chave não tem permissão. Gere uma nova e diga configurar chave.";
+                                                                                                                      if (status === 404) return "Não encontrei o modelo de inteligência. Preciso atualizar o nome do modelo.";
+                                                                                                                          if (status === 429) return "Atingi o limite gratuito de uso da inteligência. Tente de novo daqui a pouco.";
+                                                                                                                              return "A inteligência retornou o erro " + status + ".";
+                                                                                                                                }
 
-    if (modoSerio()) {
-      texto +=
-        "Personalidade: calma, séria e eficiente. O usuário pediu modo sério, " +
-        "então não faça piadas, a menos que ele peça uma. ";
-    } else {
-      texto +=
-        "Personalidade: séria, calma e eficiente, como um mordomo muito competente, " +
-        "mas com humor seco e sutil. De vez em quando, mais ou menos uma resposta a cada quatro ou cinco, " +
-        "inclua uma tirada curta e espirituosa, com ironia leve. " +
-        "Nunca faça piada quando o assunto for sério, delicado ou triste, " +
-        "quando algo deu errado, quando o usuário precisa entender algo com clareza, " +
-        "nem às custas de outras pessoas. Se o usuário pedir uma piada, conte uma. ";
-    }
+                                                                                                                                  // Tira símbolos que ficam estranhos quando falados
+                                                                                                                                    function limparParaFala(texto) {
+                                                                                                                                        return texto
+                                                                                                                                              .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+                                                                                                                                                    .replace(/[*#_`>~]/g, "")
+                                                                                                                                                          .replace(/\s+/g, " ")
+                                                                                                                                                                .trim();
+                                                                                                                                                                  }
 
-    // O que você pediu para ele lembrar
-    if (typeof Memoria !== "undefined") {
-      const memorias = Memoria.paraPrompt();
-      if (memorias) {
-        texto +=
-          "Coisas que você sabe sobre o usuário, guardadas por pedido dele " +
-          "(use apenas quando for relevante e sem anunciar que está consultando memória):\n" +
-          memorias + "\n";
-      }
-    }
+                                                                                                                                                                    async function responder(pergunta) {
+                                                                                                                                                                        const prov = provedores[nomeAtual()];
+                                                                                                                                                                            if (!prov) return "Nenhum provedor de inteligência foi carregado.";
+                                                                                                                                                                                const chave = lerChave(prov);
+                                                                                                                                                                                    if (!chave) return "Ainda não tenho uma chave do " + prov.nome + ". Diga configurar chave para ativar.";
 
-    return texto + "Data e hora atuais: " + agora + ".";
-  }
+                                                                                                                                                                                        const sistema = typeof Personalidade !== "undefined"
+                                                                                                                                                                                              ? Personalidade.instrucao()
+                                                                                                                                                                                                    : "Você é o J.A.R.V.I.S. Responda em português, em até três frases curtas.";
+                                                                                                                                                                                                        const msgs = historico.concat([{ papel: "user", texto: pergunta }]);
 
-  // Tira símbolos que ficam estranhos quando falados
-  function limparParaFala(texto) {
-    return texto
-      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
-      .replace(/[*#_`>~]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
+                                                                                                                                                                                                            const controle = new AbortController();
+                                                                                                                                                                                                                const limite = setTimeout(function () { controle.abort(); }, 25000);
 
-  function mensagemDeErro(status) {
-    if (status === 400) return "A chave parece inválida. Diga configurar chave para trocar.";
-    if (status === 401 || status === 403) return "A chave não tem permissão. Gere uma nova e diga configurar chave.";
-    if (status === 404) return "Não encontrei o modelo de inteligência. Preciso atualizar o nome do modelo no arquivo ia ponto js.";
-    if (status === 429) return "Atingi o limite gratuito de uso da inteligência. Tente de novo daqui a pouco.";
-    return "A inteligência retornou o erro " + status + ".";
-  }
+                                                                                                                                                                                                                    try {
+                                                                                                                                                                                                                          let r = { status: 0, texto: "" };
+                                                                                                                                                                                                                                for (let i = 0; i < prov.modelos.length; i++) {
+                                                                                                                                                                                                                                        r = await prov.chamar(chave, prov.modelos[i], sistema, msgs, controle.signal);
+                                                                                                                                                                                                                                                // Só tenta o próximo modelo se este recusar, não existir ou estiver no limite
+                                                                                                                                                                                                                                                        if (r.status !== 400 && r.status !== 404 && r.status !== 429) break;
+                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                    if (r.status !== 200) return mensagemDeErro(r.status);
 
-  function guardar(pergunta, resposta) {
-    historico.push({ role: "user", parts: [{ text: pergunta }] });
-    historico.push({ role: "model", parts: [{ text: resposta }] });
-    while (historico.length > MAX_HISTORICO) historico.splice(0, 2);
-  }
+                                                                                                                                                                                                                                                                          const texto = (r.texto || "").trim();
+                                                                                                                                                                                                                                                                                if (!texto) return "Não recebi uma resposta válida da inteligência. Tente perguntar de outro jeito.";
 
-  async function responder(pergunta) {
-    const chave = lerChave();
-    if (!chave) {
-      return "Ainda não tenho uma chave de inteligência. Diga configurar chave para ativar.";
-    }
+                                                                                                                                                                                                                                                                                      historico.push({ papel: "user", texto: pergunta }, { papel: "assistant", texto: texto });
+                                                                                                                                                                                                                                                                                            while (historico.length > MAX_HISTORICO) historico.splice(0, 2);
+                                                                                                                                                                                                                                                                                                  return limparParaFala(texto);
+                                                                                                                                                                                                                                                                                                      } catch (e) {
+                                                                                                                                                                                                                                                                                                            if (e && e.name === "AbortError") return "A inteligência demorou demais para responder.";
+                                                                                                                                                                                                                                                                                                                  return "Não consegui falar com a inteligência. Verifique a conexão.";
+                                                                                                                                                                                                                                                                                                                      } finally {
+                                                                                                                                                                                                                                                                                                                            clearTimeout(limite);
+                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                  }
 
-    const corpo = JSON.stringify({
-      systemInstruction: { parts: [{ text: instrucao() }] },
-      contents: historico.concat([{ role: "user", parts: [{ text: pergunta }] }]),
-      generationConfig: { maxOutputTokens: 800, temperature: 0.8 }
-    });
-
-    const controle = new AbortController();
-    const limite = setTimeout(function () { controle.abort(); }, 25000);
-
-    try {
-      let resp = null;
-      for (let i = 0; i < MODELOS.length; i++) {
-        const url =
-          "https://generativelanguage.googleapis.com/v1beta/models/" + MODELOS[i] +
-          ":generateContent?key=" + encodeURIComponent(chave);
-        resp = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: corpo,
-          signal: controle.signal
-        });
-        if (resp.status !== 404) break; // só tenta o próximo se o modelo não existir
-      }
-
-      if (!resp.ok) return mensagemDeErro(resp.status);
-
-      const dados = await resp.json();
-      const c = dados.candidates && dados.candidates[0];
-      const partes = c && c.content && c.content.parts;
-      const texto = partes
-        ? partes.map(function (p) { return p.text || ""; }).join(" ").trim()
-        : "";
-
-      if (!texto) return "Não recebi uma resposta válida da inteligência. Tente perguntar de outro jeito.";
-
-      guardar(pergunta, texto);
-      return limparParaFala(texto);
-    } catch (e) {
-      if (e && e.name === "AbortError") return "A inteligência demorou demais para responder.";
-      return "Não consegui falar com a inteligência. Verifique a conexão.";
-    } finally {
-      clearTimeout(limite);
-    }
-  }
-
-  return {
-    responder: responder,
-    configurarChave: configurarChave,
-    definirModoSerio: definirModoSerio
-  };
-})();
+                                                                                                                                                                                                                                                                                                                                    return {
+                                                                                                                                                                                                                                                                                                                                        registrar: registrar,
+                                                                                                                                                                                                                                                                                                                                            responder: responder,
+                                                                                                                                                                                                                                                                                                                                                configurarChave: configurarChave,
+                                                                                                                                                                                                                                                                                                                                                    definirModoSerio: definirModoSerio,
+                                                                                                                                                                                                                                                                                                                                                        escolherProvedor: escolherProvedor
+                                                                                                                                                                                                                                                                                                                                                          };
+                                                                                                                                                                                                                                                                                                                                                          })();

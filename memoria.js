@@ -3,127 +3,145 @@
 // NÃO peça para ele guardar senhas, números de cartão ou documentos.
 const Memoria = (function () {
   const CHAVE = "jarvis_memorias";
-  const MAX_ITENS = 40;   // quantas memórias cabem
-  const MAX_TEXTO = 200;  // tamanho máximo de cada uma
+    const MAX_ITENS = 40;   // quantas memórias cabem
+      const MAX_TEXTO = 200;  // tamanho máximo de cada uma
 
-  // ---------- "eu" vira "você" quando o JARVIS fala as memórias ----------
-  // Verbos comuns: como ficam quando o "eu" vira "você"
-  const VERBOS = {
-    sou: "é", estou: "está", tenho: "tem", gosto: "gosta", amo: "ama", odeio: "odeia",
-    moro: "mora", trabalho: "trabalha", estudo: "estuda", quero: "quer", uso: "usa",
-    prefiro: "prefere", faço: "faz", vou: "vai", posso: "pode", preciso: "precisa",
-    chamo: "chama", nasci: "nasceu", cresci: "cresceu", tive: "teve", fui: "foi",
-    fiz: "fez", comecei: "começou", terminei: "terminou", toco: "toca", jogo: "joga",
-    assisto: "assiste", leio: "lê", bebo: "bebe", como: "come", durmo: "dorme",
-    acordo: "acorda", acho: "acha", penso: "pensa", sei: "sabe", conheço: "conhece",
-    vivo: "vive", curto: "curte", adoro: "adora", detesto: "detesta", torço: "torce",
-    pretendo: "pretende", planejo: "planeja", sinto: "sente", fico: "fica",
-    cuido: "cuida", dependo: "depende", escuto: "escuta", ouço: "ouve", pratico: "pratica"
-  };
-  const ADVERBIOS = "não|nunca|sempre|também|já|só|ainda|realmente|muito|bastante|geralmente|normalmente";
+        // ---------- "eu" vira "você" quando o JARVIS fala as memórias ----------
+          // Verbos comuns: como ficam quando o "eu" vira "você"
+            const VERBOS = {
+                sou: "é", estou: "está", tenho: "tem", gosto: "gosta", amo: "ama", odeio: "odeia",
+                    moro: "mora", trabalho: "trabalha", estudo: "estuda", quero: "quer", uso: "usa",
+                        prefiro: "prefere", faço: "faz", vou: "vai", posso: "pode", preciso: "precisa",
+                            chamo: "chama", nasci: "nasceu", cresci: "cresceu", tive: "teve", fui: "foi",
+                                fiz: "fez", comecei: "começou", terminei: "terminou", toco: "toca", jogo: "joga",
+                                    assisto: "assiste", leio: "lê", bebo: "bebe", como: "come", durmo: "dorme",
+                                        acordo: "acorda", acho: "acha", penso: "pensa", sei: "sabe", conheço: "conhece",
+                                            vivo: "vive", curto: "curte", adoro: "adora", detesto: "detesta", torço: "torce",
+                                                pretendo: "pretende", planejo: "planeja", sinto: "sente", fico: "fica",
+                                                    cuido: "cuida", dependo: "depende", escuto: "escuta", ouço: "ouve", pratico: "pratica"
+                                                      };
+                                                        const ADVERBIOS = "não|nunca|sempre|também|já|só|ainda|realmente|muito|bastante|geralmente|normalmente";
 
-  function conjugar(verbo) {
-    const v = verbo.toLowerCase();
-    if (VERBOS[v]) return VERBOS[v];
-    // Palpite para verbos que não estão na lista: gosto -> gosta
-    if (v.length > 3 && v.endsWith("o")) return v.slice(0, -1) + "a";
-    return v;
-  }
+                                                          function conjugar(verbo) {
+                                                              const v = verbo.toLowerCase();
+                                                                  if (VERBOS[v]) return VERBOS[v];
+                                                                      // Palpite para verbos que não estão na lista: gosto -> gosta
+                                                                          if (v.length > 3 && v.endsWith("o")) return v.slice(0, -1) + "a";
+                                                                              return v;
+                                                                                }
 
-  function paraVoce(texto) {
-    let t = texto;
-    // "eu me sinto" -> "você se sente"
-    t = t.replace(/\beu\s+me\s+(\p{L}+)/giu, function (m, v) { return "você se " + conjugar(v); });
-    t = t.replace(/\bme chamo\b/giu, "você se chama");
-    // "eu não gosto" -> "você não gosta"
-    t = t.replace(
-      new RegExp("\\beu\\s+((?:(?:" + ADVERBIOS + ")\\s+)*)(\\p{L}+)", "giu"),
-      function (m, advs, v) { return "você " + advs + conjugar(v); }
-    );
-    // Frase que já começa pelo verbo: "moro em Recife" -> "você mora em Recife"
-    t = t.replace(/^(\p{L}+)/u, function (m, v) {
-      return VERBOS[v.toLowerCase()] ? "você " + VERBOS[v.toLowerCase()] : m;
-    });
-    t = t.replace(/\bminhas\b/giu, "suas").replace(/\bminha\b/giu, "sua");
-    t = t.replace(/\bmeus\b/giu, "seus").replace(/\bmeu\b/giu, "seu");
-    t = t.replace(/\bcomigo\b/giu, "com você").replace(/\bmim\b/giu, "você");
-    t = t.replace(/\beu\b/giu, "você");
-    t = t.replace(/\bme\b/giu, "lhe");
-    return t;
-  }
+                                                                                  function paraVoce(texto) {
+                                                                                      let t = texto;
+                                                                                          // "eu me sinto" -> "você se sente"
+                                                                                              t = t.replace(/\beu\s+me\s+(\p{L}+)/giu, function (m, v) { return "você se " + conjugar(v); });
+                                                                                                  t = t.replace(/\bme chamo\b/giu, "você se chama");
+                                                                                                      // "eu não gosto" -> "você não gosta"
+                                                                                                          t = t.replace(
+                                                                                                                new RegExp("\\beu\\s+((?:(?:" + ADVERBIOS + ")\\s+)*)(\\p{L}+)", "giu"),
+                                                                                                                      function (m, advs, v) { return "você " + advs + conjugar(v); }
+                                                                                                                          );
+                                                                                                                              // Frase que já começa pelo verbo: "moro em Recife" -> "você mora em Recife"
+                                                                                                                                  t = t.replace(/^(\p{L}+)/u, function (m, v) {
+                                                                                                                                        return VERBOS[v.toLowerCase()] ? "você " + VERBOS[v.toLowerCase()] : m;
+                                                                                                                                            });
+                                                                                                                                                t = t.replace(/\bminhas\b/giu, "suas").replace(/\bminha\b/giu, "sua");
+                                                                                                                                                    t = t.replace(/\bmeus\b/giu, "seus").replace(/\bmeu\b/giu, "seu");
+                                                                                                                                                        t = t.replace(/\bcomigo\b/giu, "com você").replace(/\bmim\b/giu, "você");
+                                                                                                                                                            t = t.replace(/\beu\b/giu, "você");
+                                                                                                                                                                t = t.replace(/\bme\b/giu, "lhe");
+                                                                                                                                                                    return t;
+                                                                                                                                                                      }
 
-  // ---------- guardar e ler ----------
-  function ler() {
-    try {
-      const bruto = localStorage.getItem(CHAVE);
-      const lista = bruto ? JSON.parse(bruto) : [];
-      return Array.isArray(lista) ? lista : [];
-    } catch (e) {
-      return [];
-    }
-  }
+                                                                                                                                                                        // ---------- guardar e ler ----------
+                                                                                                                                                                          function ler() {
+                                                                                                                                                                              try {
+                                                                                                                                                                                    const bruto = localStorage.getItem(CHAVE);
+                                                                                                                                                                                          const lista = bruto ? JSON.parse(bruto) : [];
+                                                                                                                                                                                                return Array.isArray(lista) ? lista : [];
+                                                                                                                                                                                                    } catch (e) {
+                                                                                                                                                                                                          return [];
+                                                                                                                                                                                                              }
+                                                                                                                                                                                                                }
 
-  function salvar(lista) {
-    try {
-      localStorage.setItem(CHAVE, JSON.stringify(lista));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
+                                                                                                                                                                                                                  function salvar(lista) {
+                                                                                                                                                                                                                      try {
+                                                                                                                                                                                                                            localStorage.setItem(CHAVE, JSON.stringify(lista));
+                                                                                                                                                                                                                                  return true;
+                                                                                                                                                                                                                                      } catch (e) {
+                                                                                                                                                                                                                                            return false;
+                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                  }
 
-  // Guarda uma memória nova
-  function lembrar(texto) {
-    const limpo = texto.trim().replace(/[.!?\s]+$/, "").slice(0, MAX_TEXTO);
-    if (!limpo) return { ok: false, mensagem: "Não entendi o que devo lembrar." };
+                                                                                                                                                                                                                                                    // Compara textos sem ligar para acento, pontuação, maiúscula ou o "eu" do começo
+                                                                                                                                                                                                                                                      function normalizar(texto) {
+                                                                                                                                                                                                                                                          return texto
+                                                                                                                                                                                                                                                                .toLowerCase()
+                                                                                                                                                                                                                                                                      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                                                                                                                                                                                                                                                                            .replace(/[^a-z0-9\s]/g, " ")
+                                                                                                                                                                                                                                                                                  .replace(/\s+/g, " ")
+                                                                                                                                                                                                                                                                                        .trim()
+                                                                                                                                                                                                                                                                                              .replace(/^eu /, "");
+                                                                                                                                                                                                                                                                                                }
 
-    const lista = ler();
-    if (lista.length >= MAX_ITENS) {
-      return { ok: false, mensagem: "Minha memória está cheia. Peça para eu esquecer algo antes." };
-    }
-    lista.push({ t: limpo, d: new Date().toISOString().slice(0, 10) });
-    if (!salvar(lista)) {
-      return { ok: false, mensagem: "Não consegui gravar a memória neste navegador." };
-    }
-    return { ok: true, mensagem: "Anotado. Vou me lembrar disso." };
-  }
+                                                                                                                                                                                                                                                                                                  // Guarda uma memória nova
+                                                                                                                                                                                                                                                                                                    function lembrar(texto) {
+                                                                                                                                                                                                                                                                                                        const limpo = texto.trim().replace(/[.!?\s]+$/, "").slice(0, MAX_TEXTO);
+                                                                                                                                                                                                                                                                                                            if (!limpo) return { ok: false, mensagem: "Não entendi o que devo lembrar." };
 
-  // Lista só os textos originais
-  function listar() {
-    return ler().map(function (item) { return item.t; });
-  }
+                                                                                                                                                                                                                                                                                                                const lista = ler();
 
-  function esquecerUltima() {
-    const lista = ler();
-    if (lista.length === 0) return false;
-    lista.pop();
-    return salvar(lista);
-  }
+                                                                                                                                                                                                                                                                                                                    // Já sabe? Então não guarda repetido
+                                                                                                                                                                                                                                                                                                                        const nova = normalizar(limpo);
+                                                                                                                                                                                                                                                                                                                            if (lista.some(function (item) { return normalizar(item.t) === nova; })) {
+                                                                                                                                                                                                                                                                                                                                  return { ok: true, mensagem: "Isso eu já sabia." };
+                                                                                                                                                                                                                                                                                                                                      }
 
-  function limpar() {
-    try {
-      localStorage.removeItem(CHAVE);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
+                                                                                                                                                                                                                                                                                                                                          if (lista.length >= MAX_ITENS) {
+                                                                                                                                                                                                                                                                                                                                                return { ok: false, mensagem: "Minha memória está cheia. Peça para eu esquecer algo antes." };
+                                                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                                                                                        lista.push({ t: limpo, d: new Date().toISOString().slice(0, 10) });
+                                                                                                                                                                                                                                                                                                                                                            if (!salvar(lista)) {
+                                                                                                                                                                                                                                                                                                                                                                  return { ok: false, mensagem: "Não consegui gravar a memória neste navegador." };
+                                                                                                                                                                                                                                                                                                                                                                      }
+                                                                                                                                                                                                                                                                                                                                                                          return { ok: true, mensagem: "Anotado. Vou me lembrar disso." };
+                                                                                                                                                                                                                                                                                                                                                                            }
 
-  // Texto para a IA: mantém as palavras originais, deixando claro quem disse
-  function paraPrompt() {
-    const itens = listar();
-    if (itens.length === 0) return "";
-    return itens.map(function (t) {
-      return "- O usuário pediu para lembrar: \"" + t + "\"";
-    }).join("\n");
-  }
+                                                                                                                                                                                                                                                                                                                                                                              // Lista só os textos originais
+                                                                                                                                                                                                                                                                                                                                                                                function listar() {
+                                                                                                                                                                                                                                                                                                                                                                                    return ler().map(function (item) { return item.t; });
+                                                                                                                                                                                                                                                                                                                                                                                      }
 
-  return {
-    lembrar: lembrar,
-    listar: listar,
-    esquecerUltima: esquecerUltima,
-    limpar: limpar,
-    paraPrompt: paraPrompt,
-    paraVoce: paraVoce
-  };
-})();
+                                                                                                                                                                                                                                                                                                                                                                                        function esquecerUltima() {
+                                                                                                                                                                                                                                                                                                                                                                                            const lista = ler();
+                                                                                                                                                                                                                                                                                                                                                                                                if (lista.length === 0) return false;
+                                                                                                                                                                                                                                                                                                                                                                                                    lista.pop();
+                                                                                                                                                                                                                                                                                                                                                                                                        return salvar(lista);
+                                                                                                                                                                                                                                                                                                                                                                                                          }
+
+                                                                                                                                                                                                                                                                                                                                                                                                            function limpar() {
+                                                                                                                                                                                                                                                                                                                                                                                                                try {
+                                                                                                                                                                                                                                                                                                                                                                                                                      localStorage.removeItem(CHAVE);
+                                                                                                                                                                                                                                                                                                                                                                                                                            return true;
+                                                                                                                                                                                                                                                                                                                                                                                                                                } catch (e) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                      return false;
+                                                                                                                                                                                                                                                                                                                                                                                                                                          }
+                                                                                                                                                                                                                                                                                                                                                                                                                                            }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                              // Texto para a IA: mantém as palavras originais, deixando claro quem disse
+                                                                                                                                                                                                                                                                                                                                                                                                                                                function paraPrompt() {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    const itens = listar();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        if (itens.length === 0) return "";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            return itens.map(function (t) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                  return "- O usuário pediu para lembrar: \"" + t + "\"";
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                      }).join("\n");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                          return {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                              lembrar: lembrar,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  listar: listar,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      esquecerUltima: esquecerUltima,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          limpar: limpar,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              paraPrompt: paraPrompt,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  paraVoce: paraVoce
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    };
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    })();
