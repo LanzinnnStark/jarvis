@@ -2,7 +2,7 @@
 // A chave fica só neste aparelho. NUNCA coloque a chave no código nem no GitHub.
 const IA = (function () {
   const ESCOLHA = "jarvis_provedor";
-    const MAX_HISTORICO = 8;
+    const MAX_HISTORICO = 16;
       const historico = [];
         const provedores = {};
 
